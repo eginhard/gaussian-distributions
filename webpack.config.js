@@ -7,6 +7,9 @@ module.exports = {
 	entry: {
 		index: "./src/index.js",
 	},
+        watchOptions: {
+          ignored: /\.#|node_modules|~$/,
+        },
 	resolve: {
 		extensions: [".js", ".html", ".npy"],
 	},

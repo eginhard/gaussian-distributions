@@ -1,0 +1,46 @@
+<script>
+ // Computing the ellipses according to:
+ // http://www.visiondummy.com/2014/04/draw-error-ellipse-representing-covariance-matrix/
+ import * as gauss from '../gaussian';
+ import * as d3 from 'd3';
+ import {Context} from './util/context';
+
+ export let context = new Context(300, 300, [-4, 4], [-4, 4]);
+ export let gaussian = new gauss.Gaussian([0,0], [[1,0.7],[0.7,2]]);
+ export let contours = [
+   Math.sqrt(4.61),
+   Math.sqrt(3.22),
+   Math.sqrt(2.41),
+   Math.sqrt(1.83),
+   Math.sqrt(1.39),
+   Math.sqrt(1.02),
+   Math.sqrt(0.731),
+   Math.sqrt(0.446),
+   Math.sqrt(0.211)
+ ]
+
+ export let transform;
+ $: {
+   const [mx, my] = gaussian.getMean();
+   const [[a,c], [b,d]] = gaussian.transformationMatrix();
+   transform = `matrix(${a},${-b},${-c},${d},${context.u(mx)},${context.v(my)})`;
+ }
+
+ export let radii;
+ $: {
+   radii = contours.map(c => ({
+          x: context.u(c) - context.u(0),
+          y: context.v(0) - context.v(c),
+        }));
+ }
+
+ export let color;
+ $: {
+   color = d3.scaleSequential(d3.interpolateRdPu).domain([0, contours.length - 1]);
+ }
+</script>
+
+<svelte:options namespace="svg"/>
+{#each radii as r, idx}
+<ellipse rx="{r.x}" ry="{r.y}" fill="{color(idx)}" {transform} vector-effect="non-scaling-stroke" />
+{/each}

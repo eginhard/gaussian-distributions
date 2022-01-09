@@ -1,15 +1,16 @@
 {
-	"title": "Distill Example",
-	"description": "An example project using Webpack, Babel, and Svelte.",
-	"password": "svgs",
+	"title": "Gaussian Distributions",
+	"description": "",
 	"authors": [
 		{
-			"author": "Ludwig Schubert",
-			"authorURL": "https://schubert.io/",
-			"affiliation": "OpenAI",
-			"affiliationURL": "https://openai.com"
+			"author": "Enno Hermann",
+			"authorURL": "https://enno.xyz/",
+			"affiliation": "Idiap Research Institute",
+			"affiliationURL": "https://idiap.ch"
 		}
 	],
+  "published": "January 10, 2022",
+  "doi": "",
 	"katex": {
 		"delimiters": [
 			{

@@ -18,23 +18,49 @@
   </d-front-matter>
 
   <d-title>
-    <h1>Distill Example</h1>
-    <p>An example project using Webpack, Babel, and Svelte. </p>
+    <h1>Gaussian Distributions</h1>
+    <p></p>
   </d-title>
 
   <d-article>
 
+    <h2>Useful formulas and definitions</h2>
+
+    <h3>Gaussian distributions</h3>
+
     <p>
-      Welcome to a Distill example article: meant to get you writing up your research quickly. Let's demo some
-      features:
+      The <em>Gaussian probability density function</em> (pdf) for the $d$-dimensional
+      random variable $x \sim \mathcal N (\mu, \Sigma)$ is given by:
     </p>
 
-    <h4>Hot reloading</h4>
-    <p>Your browser can automatically refresh when your editor saves. This should work by default, and you can disable
-      it in <code>index.js</code>. Sometimes hot reloading isn't fully compatible with all types of code, so you may
-      need to try manually reloading if you're seeing inconsistent behavior.</p>
+    <p>$$g_{(\mu,\Sigma)}(x) = \frac{1}{\sqrt{2\pi}^d \sqrt{\det\left(\Sigma\right)}} \, e^{-\frac{1}{2} (x-\mu)^T \Sigma^{-1} (x-\mu)}$$</p>
 
-    <h4>Inlined SVGs</h4>
+    <p>
+      where $\mu$ is the mean vector and $\Sigma$ the covariance matrix. $\mu$ and
+      $\Sigma$ are the parameters of the Gaussian distribution. Speech features
+      (or acoustic features) are examples of $d$-dimensional variables, and it is
+      often assumed that they follow a Gaussian distribution.
+    </p>
+
+    <d-figure id="multivariate-dfigure">
+      <figure>
+        <div id="multivariate-target"></div>
+        <figcaption>2-D Gaussian figure</figcaption>
+      </figure>
+    </d-figure>
+
+    <h3 id="formants">Formants</h3>
+    <p>Formants are resonant frequencies in the vocal tract. A simple way of distinguishing
+      vowels is to look at their first and second formants, F1 and F2.
+    </p>
+
+    <!-- Source: https://commons.wikimedia.org/wiki/File:English_Monophthong_Formants_Bradlow1995.png
+         License: CC0 -->
+    <figure>
+      <img src="images/English_Monophthong_Formants_Bradlow1995.png" alt="Vowel chart">
+    </figure>
+
+    <h2 id="inlined-svgs">Inlined SVGs</h2>
     <p>SVGs are so small that it can be nice to save an extra request and simply inline them intop your HTML:</p>
 
     <figure>
@@ -211,8 +237,8 @@
     <d-code block="" language="python">
       # Python 3: Fibonacci series up to n
       def fib(n):
-      a, b = 0, 1
-      while a &lt; n: print(a, end=' ' ) a, b=b, a+b </d-code>
+        a, b = 0, 1
+        while a &lt; n: print(a, end=' ' ) a, b=b, a+b </d-code>
 
     <h4>Tables</h4>
     <p>We have simple tables that try to stay readable at most screen sizes:
