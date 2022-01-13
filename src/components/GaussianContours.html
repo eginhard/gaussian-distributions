@@ -4,25 +4,26 @@
  import * as gauss from '../gaussian';
  import * as d3 from 'd3';
  import {Context} from './util/context';
+ import {contourInterpolator} from '../util';
 
  export let context = new Context(300, 300, [-4, 4], [-4, 4]);
  export let gaussian = new gauss.Gaussian([0,0], [[1,0.7],[0.7,2]]);
  export let contours = [
    Math.sqrt(4.61),
    Math.sqrt(3.22),
-   Math.sqrt(2.41),
+   //Math.sqrt(2.41),
    Math.sqrt(1.83),
-   Math.sqrt(1.39),
+   //Math.sqrt(1.39),
    Math.sqrt(1.02),
-   Math.sqrt(0.731),
+   //Math.sqrt(0.731),
    Math.sqrt(0.446),
-   Math.sqrt(0.211)
+   //Math.sqrt(0.211)
  ]
 
  export let transform;
  $: {
    const [mx, my] = gaussian.getMean();
-   const [[a,c], [b,d]] = gaussian.transformationMatrix();
+   const [[a,c], [b,d]] = gaussian.transformationMatrix().to2DArray();
    transform = `matrix(${a},${-b},${-c},${d},${context.u(mx)},${context.v(my)})`;
  }
 
@@ -36,7 +37,7 @@
 
  export let color;
  $: {
-   color = d3.scaleSequential(d3.interpolateRdPu).domain([0, contours.length - 1]);
+   color = d3.scaleSequential(contourInterpolator).domain([0, contours.length - 1]);
  }
 </script>
 

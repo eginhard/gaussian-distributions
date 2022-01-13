@@ -1,6 +1,28 @@
 import * as m from 'ml-matrix';
 import random from 'random';
 
+export class Gaussian1D {
+  constructor(mean, variance) {
+    this.mean = mean;
+    this.variance = variance;
+    this.normal = random.normal();
+  }
+
+  at(x) {
+    const n = Math.exp(-0.5 * Math.pow(x - this.mean, 2) / this.variance);
+    const d = Math.sqrt(this.variance * 2 * Math.PI);
+    return (n * (1 / d));
+  }
+
+  sample() {
+    return (this.std() * this.normal() + this.mean);
+  }
+
+  std() {
+    return Math.sqrt(this.variance);
+  }
+}
+
 export class Gaussian {
   constructor(mean, cov) {
     // TODO: Consider saving the dimension
@@ -11,6 +33,7 @@ export class Gaussian {
       this.mean = new m.Matrix([mean]).transpose();
       this.cov = new m.Matrix(cov);
     }
+    this.dim = this.mean.rows;
   }
 
   at(x) {
@@ -60,6 +83,7 @@ export class Gaussian {
       d.set(i,i, Math.sqrt(e.realEigenvalues[i]));
     }
     return r.mmul(d);
+    //return r.mmul(d).to2DArray();
   }
 
   sample() {
@@ -67,13 +91,12 @@ export class Gaussian {
     const normal = random.normal();
     for(let i = 0; i < this.mean.rows; ++i)
       z.set(i,0,normal());
-
     const samples = m.Matrix.add(this.mean, this.transformationMatrix().mmul(z));
     return samples;
   }
 
   getMean() {
-    return this.mean.transpose()[0];
+    return this.mean.getColumn(0);
   }
 
   getSd() {

@@ -76,7 +76,8 @@ module.exports = {
 		historyApiFallback: true,
 		overlay: true,
 		stats: "minimal",
-		contentBase: __dirname + "/public",
+	  contentBase: __dirname + "/public",
+          //liveReload: false,
 	},
 	devtool: "inline-source-map",
 };

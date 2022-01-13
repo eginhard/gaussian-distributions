@@ -21,12 +21,12 @@
  export let colorBar;
 
  beforeUpdate(() => {
-   const height = current.size - current.margin.top - current.margin.bottom;
+   const height = size - margin.top - margin.bottom;
    // FIXME: Handle non-linear case
-   const tickScale = d3.scaleLinear().domain(current.colorScale.domain()).range([height, 0]);
+   //const tickScale = d3.scaleLinear().domain(colorScale.domain()).range([height, 0]);
 
-   const axisGen = d3.axisRight(tickScale).tickFormat(d3.format('.2f')).ticks(5);
-   d3.select(colorBar).call(axisGen);
+   //const axisGen = d3.axisRight(tickScale).tickFormat(d3.format('.2f')).ticks(5);
+   //d3.select(colorBar).call(axisGen);
  });
 </script>
 

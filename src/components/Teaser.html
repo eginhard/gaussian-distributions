@@ -1,0 +1,176 @@
+<script>
+ import { onMount, afterUpdate } from 'svelte';
+ import * as d3 from 'd3';
+ import * as gauss from '../gaussian';
+ import {Context} from './util/context';
+ import {twoDecimals} from '../util';
+
+ export let graph;
+
+ export let variance = {
+   name: "Variance",
+   value: 1,
+   min: 0.1,
+   max: 2
+ }
+
+ export let context = new Context(700, 400, [-3, 3], [-0.1, 1]);
+ export let gaussian = new gauss.Gaussian1D(0, variance.value);
+
+ export let mean;
+ $: mean = d3.line()
+             .x(d => context.u(d[0]))
+             .y(d => context.v(d[1]));
+ export let sdArea;
+ $: sdArea = d3.area()
+               .x(d => context.u(d[0]))
+               .y0(d => context.v(d[1] - 2*d[2]))
+               .y1(d => context.v(d[1] + 2*d[2]));
+ export let curve;
+ $: {
+   const N = 75;
+   const [xmin, xmax] = context.xDomain();
+   const step = (xmax - xmin) / N;
+   const xs = d3.range(xmin, xmax + step, step);
+   const ys = xs.map(x => gaussian.at([x]));
+
+   curve = d3.zip(xs, ys);
+ }
+
+
+ const n_samples = 10000;
+ const n_bins = 100;
+ const [xmin, xmax] = context.xDomain();
+ const bin_width = (xmax - xmin) / n_bins;
+
+ function sample() {
+   const xs = d3.range(xmin, xmax + bin_width, bin_width);
+   const histGenerator = d3.bin()
+                           .domain([xmin, xmax])
+                           .thresholds(n_bins - 1);
+   const values = [];
+   for (let i = 0; i < n_samples; i++) {
+     values.push(gaussian.sample());
+   }
+   return histGenerator(values);
+ }
+
+ export let bins = sample();
+
+ function toV(context, y) {
+   return context.v(y);
+ }
+
+ function toU(context, x) {
+   return context.u(x);
+ }
+
+ function updateSlider(variance) {
+   gaussian.variance = variance.value;
+   bins = sample();
+ }
+
+ onMount(() => {
+   const svg = d3.select(graph);
+   // svg.append('path').data([curve])
+   //    .attr('class', 'sdArea')
+   //    .attr('stroke', 'none')
+   //    .attr('fill', 'rgba(253,224,221,0.6')
+   //    .attr('d', sdArea);
+
+   var bar = svg.selectAll('.bar')
+                .data(bins)
+                .enter().append('g')
+                .attr('class', 'bar');
+   // .attr('transform', function (d) {
+   //   return 'translate(' + toU(context, d.x) + ',' + toV(context, d.y) + ')';
+   // });
+   bar.append('rect')
+      .attr('x', d => context.u(d.x0))
+      .attr('y', d => context.v(d.length / (n_samples * bin_width)))
+      .attr('width', d => context.u(d.x1) - context.u(d.x0))
+      .attr('height', d => context.v(0) - context.v(d.length / (n_samples * bin_width)))
+      .attr('stroke', '#fa9fb5')
+      .attr('fill', 'rgba(253,224,221,0.6');
+
+   svg.append('path').data([curve])
+      .attr('class', 'curve')
+      .attr('fill', 'none')
+      .attr('stroke', '#c51b8a')
+      .attr('stroke-width', '2px')
+      .attr('d', mean);
+   // function (d) {return context.height - toV(context, d.y);})
+   // function (d) {return (toU(context, d.dx) - toU(context, 0)) <= 0 ? 0 : (toU(context, d.dx) - toU(context, 0)) - 1;})
+ });
+
+ afterUpdate(() => {
+   const svg = d3.select(graph);
+   svg.transition()
+      .select('.curve')
+      .duration(750)
+      .attr('d', mean(curve));
+   svg.selectAll('rect')
+      .data(bins)
+      .transition()
+      .duration(750)
+      .attr('y', d => context.v(d.length / (n_samples * bin_width)))
+      .attr('height', d => context.v(0) - context.v(d.length / (n_samples * bin_width)));
+ });
+</script>
+
+
+<svg width="{context.width}" height="{context.height}">
+  <g bind:this={graph}>
+    <text x="16" y="{toV(context, 0)+15}" class="annotation">y = 0</text>
+    <line class="zero" x1="0" y1="{toV(context, 0)}" x2="{context.width}" y2="{toV(context, 0)}" />
+
+    <text x="{toU(context, 0)+15}" y="{context.height-15}" class="annotation">x = 0</text>
+    <line class="zero" x1="{toU(context, 0)}" y1="0" x2="{toU(context, 0)}" y2="{context.height}" />
+
+    <text x="{toU(context, gaussian.std())+15}" y="15" class="annotation">σ = {twoDecimals(gaussian.std())}</text>
+    <line class="sd" x1="{toU(context, gaussian.std())}" y1="0" x2="{toU(context, gaussian.std())}" y2="{context.height}" />
+    <line class="sd" x1="{toU(context, -gaussian.std())}" y1="0" x2="{toU(context, -gaussian.std())}" y2="{context.height}" />
+  </g>
+
+  <text x="16" y="10" class="annotation">
+    The <tspan font-weight="bold">probability density function</tspan> <tspan fill="#c51b8a">(line)</tspan>
+    <tspan x="16" dy="1.5em">of a Gaussian distribution with standard</tspan>
+    <tspan x="16" dy="1.5em">deviation σ shows how samples from it</tspan>
+    <tspan x="16" dy="1.5em">will be distributed</tspan>
+  </text>
+  <text x="470" y="200" class="annotation">
+    The histogram <tspan fill="#fa9fb5">(shaded)</tspan> shows the
+    <tspan x="470" dy="1.5em">actual distribution of {n_samples} samples</tspan>
+  </text>
+</svg>
+
+<div class="grid-item">
+<p class="label"> <input disabled class="labelSlider" bind:value={variance.name}> = <input disabled class="entry" bind:value={variance.value} min='{variance.min}' max='{variance.max}'></p>
+<input bind:value={variance.value} type='range' min='{variance.min}' max='{variance.max}' step='0.01'
+       on:input="{updateSlider(variance)}">
+</div>
+<style>
+  .zero {
+    stroke: rgba(0,0,0,0.5);
+    stroke-width: 1px;
+  }
+
+ .sd {
+    stroke: rgba(0,0,0,0.2);
+    stroke-width: 1px;
+  }
+
+ /* .line {
+    fill: none;
+    stroke: #c51b8a;
+    stroke-width: 2px;
+    } */
+
+ input {
+   font-size: 12px;
+ }
+
+  .grid-item {
+    /*margin: 0.5em;*/
+  }
+</style>
