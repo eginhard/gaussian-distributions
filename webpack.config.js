@@ -21,13 +21,19 @@ module.exports = {
 	module: {
 		rules: [
 			{
-				test: /\.(html|js)$/,
-				exclude: /node_modules/,
-				loader: "babel-loader",
-				options: {
-					presets: ["@babel/preset-env"],
-				},
+			  test: /\.(html|js)$/,
+			  exclude: /node_modules/,
+			  loader: "babel-loader",
+			  options: {
+			    presets: ["@babel/preset-env"],
+			  },
 			},
+                        {
+                          test: /\.m?js/,
+                          resolve: {
+                            fullySpecified: false,
+                          },
+                        },
 			{
 				test: /\.css$/i,
 				use: ["to-string-loader", "css-loader"],
@@ -70,13 +76,15 @@ module.exports = {
 			filename: "index.html",
 			chunks: ["index"],
 		}),
-		new CopyWebpackPlugin([{ from: "static/" }]),
+		new CopyWebpackPlugin({ patterns: [{ from: "static/" }]}),
 	],
 	devServer: {
-		historyApiFallback: true,
-		overlay: true,
-		stats: "minimal",
-	  contentBase: __dirname + "/public",
+          client: { overlay: true},
+          devMiddleware: {
+            stats: "minimal",
+          },
+          historyApiFallback: true,
+	  static: __dirname + "/public",
           //liveReload: false,
 	},
 	devtool: "inline-source-map",
