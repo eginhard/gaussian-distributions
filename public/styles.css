@@ -66,9 +66,11 @@ d-figure > figure {
 }
 
 .label {
-    fill: rgba(0, 0, 0, 0.6);
-    font-size: 13px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+  fill: rgba(0, 0, 0, 0.6);
+  font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial,
+    sans-serif;
   margin: 1rem 0 0 0;
 }
 
@@ -91,11 +93,12 @@ figcaption {
 }
 
 .axis text {
-  fill: rgba(0,0,0,0.6);
+  fill: rgba(0, 0, 0, 0.6);
 }
 
-.axis path, .axis line {
-  stroke: rgba(0,0,0,0.6);
+.axis path,
+.axis line {
+  stroke: rgba(0, 0, 0, 0.6);
 }
 
 .plot {
@@ -110,19 +113,21 @@ rect.plot {
 }
 
 .annotation {
-  fill: rgba(0,0,0,0.6);
+  fill: rgba(0, 0, 0, 0.6);
   font-size: 13px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial,
+    sans-serif;
 }
 
 .meanCurve {
   fill: none;
-  stroke: rgba(0,0,0,0.2);
+  stroke: rgba(0, 0, 0, 0.2);
   stroke-width: 2px;
 }
 .sdLine {
   fill: none;
-  stroke: rgba(0,0,0,0.2);
+  stroke: rgba(0, 0, 0, 0.2);
   stroke-width: 2px;
   stroke-dasharray: 4;
 }
@@ -131,23 +136,23 @@ rect.plot {
   fill: none;
 }
 
-.condCircleOutline{
+.condCircleOutline {
   fill: transparent;
-  stroke: rgba(0,0,0,0.4);
+  stroke: rgba(0, 0, 0, 0.4);
   stroke-width: 2px;
   stroke-dasharray: 2;
 }
-.condCircleOutline.active{
-  stroke: rgba(0,0,0,0.4);
+.condCircleOutline.active {
+  stroke: rgba(0, 0, 0, 0.4);
   stroke-width: 2px;
   stroke-dasharray: none;
 }
 
-.condCircle{
+.condCircle {
   fill: transparent;
   stroke: none;
 }
-.condCircle.active{
+.condCircle.active {
   fill: rgba(0, 0, 0, 0.6);
   stroke: none;
 }
