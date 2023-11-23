@@ -1,8 +1,5 @@
-var ghpages = require('gh-pages');
+var ghpages = require("gh-pages");
 
-ghpages.publish(
-	'public',
-	() => {
-		console.log('Deploy Complete!');
-	}
-);
+ghpages.publish("public", () => {
+  console.log("Deploy Complete!");
+});

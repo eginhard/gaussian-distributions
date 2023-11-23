@@ -1,28 +1,28 @@
 {
-	"title": "Gaussian Distributions",
-	"description": "",
-	"authors": [
-		{
-			"author": "Enno Hermann",
-			"authorURL": "https://enno.xyz/",
-			"affiliation": "Idiap Research Institute",
-			"affiliationURL": "https://idiap.ch"
-		}
-	],
+  "title": "Gaussian Distributions",
+  "description": "",
+  "authors": [
+    {
+      "author": "Enno Hermann",
+      "authorURL": "https://enno.xyz/",
+      "affiliation": "Idiap Research Institute",
+      "affiliationURL": "https://idiap.ch"
+    }
+  ],
   "published": "January 10, 2022",
   "doi": " ",
-	"katex": {
-		"delimiters": [
-			{
-				"left": "$",
-				"right": "$",
-				"display": false
-			},
-			{
-				"left": "$$",
-				"right": "$$",
-				"display": true
-			}
-		]
-	}
+  "katex": {
+    "delimiters": [
+      {
+        "left": "$",
+        "right": "$",
+        "display": false
+      },
+      {
+        "left": "$$",
+        "right": "$$",
+        "display": true
+      }
+    ]
+  }
 }

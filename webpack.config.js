@@ -4,88 +4,88 @@ var HtmlWebpackPlugin = require("html-webpack-plugin");
 var CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
-	entry: {
-		index: "./src/index.js",
-	},
-        watchOptions: {
-          ignored: /\.#|node_modules|~$/,
+  entry: {
+    index: "./src/index.js",
+  },
+  watchOptions: {
+    ignored: /\.#|node_modules|~$/,
+  },
+  resolve: {
+    extensions: [".js", ".html", ".npy"],
+  },
+  output: {
+    path: __dirname + "/public",
+    filename: "[name].bundle.js",
+    chunkFilename: "[name].[id].js",
+  },
+  module: {
+    rules: [
+      {
+        test: /\.(html|js)$/,
+        exclude: /node_modules/,
+        loader: "babel-loader",
+        options: {
+          presets: ["@babel/preset-env"],
         },
-	resolve: {
-		extensions: [".js", ".html", ".npy"],
-	},
-	output: {
-		path: __dirname + "/public",
-		filename: "[name].bundle.js",
-		chunkFilename: "[name].[id].js",
-	},
-	module: {
-		rules: [
-			{
-			  test: /\.(html|js)$/,
-			  exclude: /node_modules/,
-			  loader: "babel-loader",
-			  options: {
-			    presets: ["@babel/preset-env"],
-			  },
-			},
-                        {
-                          test: /\.m?js/,
-                          resolve: {
-                            fullySpecified: false,
-                          },
-                        },
-			{
-				test: /\.css$/i,
-				use: ["to-string-loader", "css-loader"],
-			},
-			{
-				test: /\.(html|svelte)$/,
-				exclude: /node_modules/,
-				loader: "svelte-loader",
-			},
-			{
-				test: /\.(npy|npc)$/,
-				exclude: /node_modules/,
-				loader: "numpy-loader",
-				options: {
-					outputPath: "data/",
-				},
-			},
-			{
-				test: /\.svg$/,
-				exclude: /node_modules/,
-				loader: "svg-inline-loader",
-				options: {
-					removeSVGTagAttrs: true,
-					removingTagAttrs: ["font-family"],
-				},
-			},
-			{
-				test: /\.(png|jpg|jpeg)$/,
-				exclude: /node_modules/,
-				loader: "file",
-				options: {
-					outputPath: "images/",
-				},
-			},
-		],
-	},
-	plugins: [
-		new HtmlWebpackPlugin({
-			template: "./src/index.ejs",
-			filename: "index.html",
-			chunks: ["index"],
-		}),
-		new CopyWebpackPlugin({ patterns: [{ from: "static/" }]}),
-	],
-	devServer: {
-          client: { overlay: true},
-          devMiddleware: {
-            stats: "minimal",
-          },
-          historyApiFallback: true,
-	  static: __dirname + "/public",
-          //liveReload: false,
-	},
-	devtool: "inline-source-map",
+      },
+      {
+        test: /\.m?js/,
+        resolve: {
+          fullySpecified: false,
+        },
+      },
+      {
+        test: /\.css$/i,
+        use: ["to-string-loader", "css-loader"],
+      },
+      {
+        test: /\.(html|svelte)$/,
+        exclude: /node_modules/,
+        loader: "svelte-loader",
+      },
+      {
+        test: /\.(npy|npc)$/,
+        exclude: /node_modules/,
+        loader: "numpy-loader",
+        options: {
+          outputPath: "data/",
+        },
+      },
+      {
+        test: /\.svg$/,
+        exclude: /node_modules/,
+        loader: "svg-inline-loader",
+        options: {
+          removeSVGTagAttrs: true,
+          removingTagAttrs: ["font-family"],
+        },
+      },
+      {
+        test: /\.(png|jpg|jpeg)$/,
+        exclude: /node_modules/,
+        loader: "file",
+        options: {
+          outputPath: "images/",
+        },
+      },
+    ],
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: "./src/index.ejs",
+      filename: "index.html",
+      chunks: ["index"],
+    }),
+    new CopyWebpackPlugin({ patterns: [{ from: "static/" }] }),
+  ],
+  devServer: {
+    client: { overlay: true },
+    devMiddleware: {
+      stats: "minimal",
+    },
+    historyApiFallback: true,
+    static: __dirname + "/public",
+    //liveReload: false,
+  },
+  devtool: "inline-source-map",
 };

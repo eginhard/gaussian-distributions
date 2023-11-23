@@ -1,84 +1,109 @@
 <script>
- import { onMount } from 'svelte';
- import * as d3 from 'd3';
- import {twoDecimals, contourInterpolator} from '../util';
- import * as gauss from '../gaussian';
- import {Context} from './util/context';
- import InteractiveGaussian from './InteractiveGaussian.html';
- import CovMat2x2 from './CovMat2x2.html';
- import ColorScale from './ColorScale.html';
+  import { onMount } from "svelte";
+  import * as d3 from "d3";
+  import { twoDecimals, contourInterpolator } from "../util";
+  import * as gauss from "../gaussian";
+  import { Context } from "./util/context";
+  import InteractiveGaussian from "./InteractiveGaussian.html";
+  import CovMat2x2 from "./CovMat2x2.html";
+  import ColorScale from "./ColorScale.html";
 
- export let scale = d3.scaleSequential(contourInterpolator).domain([0, 0.2]);
- export let context = new Context(200, 200, [-2, 2], [-2, 2]);
- export let gaussian = new gauss.Gaussian([0, 0], [[1, 0], [0, 1]]);
+  export let scale = d3.scaleSequential(contourInterpolator).domain([0, 0.2]);
+  export let context = new Context(200, 200, [-2, 2], [-2, 2]);
+  export let gaussian = new gauss.Gaussian(
+    [0, 0],
+    [
+      [1, 0],
+      [0, 1],
+    ],
+  );
 
- function update_gaussian(event) {
-   gaussian = event.detail.gaussian;
- }
-
+  function update_gaussian(event) {
+    gaussian = event.detail.gaussian;
+  }
 </script>
 
 <div class="gauss-grid">
-    <div class="grid-item">
-        <svg width="{context.width}" height="{context.height}" viewBox="0 0 {context.width} {context.height}" class="plot">
-            <InteractiveGaussian on:update={update_gaussian} sigma1="{gaussian.cov.get(0,0)}" sigma2="{gaussian.cov.get(1,1)}"
-                                 cov="{gaussian.cov.get(0,1)}" context="{context}"/>
-        </svg>
-    </div>
-    <div class="grid-item">
-      <svg width="450" height="200">
-        <!-- <g transform="translate(0,20)">
+  <div class="grid-item">
+    <svg
+      width="{context.width}"
+      height="{context.height}"
+      viewBox="0 0 {context.width} {context.height}"
+      class="plot"
+    >
+      <InteractiveGaussian
+        on:update="{update_gaussian}"
+        sigma1="{gaussian.cov.get(0,0)}"
+        sigma2="{gaussian.cov.get(1,1)}"
+        cov="{gaussian.cov.get(0,1)}"
+        context="{context}"
+      />
+    </svg>
+  </div>
+  <div class="grid-item">
+    <svg width="450" height="200">
+      <!-- <g transform="translate(0,20)">
              <ColorScale colorScale={scale} />
              </g> -->
-        <text x="70" y="40" class="annotation"><tspan font-weight="bold">Covariance matrix (Σ)</tspan></text>
-        <g transform="translate(82,50)">
-          <CovMat2x2 sigma1={twoDecimals(gaussian.cov.get(0,0))} sigma2={twoDecimals(gaussian.cov.get(1,1))}
-             corr={twoDecimals(gaussian.cov.get(0,1))} />
-        </g>
-        <text x="230" y="30" class="annotation">
+      <text x="70" y="40" class="annotation">
+        <tspan font-weight="bold">Covariance matrix (Σ)</tspan>
+      </text>
+      <g transform="translate(82,50)">
+        <CovMat2x2
+          sigma1="{twoDecimals(gaussian.cov.get(0,0))}"
+          sigma2="{twoDecimals(gaussian.cov.get(1,1))}"
+          corr="{twoDecimals(gaussian.cov.get(0,1))}"
+        />
+      </g>
+      <text x="230" y="30" class="annotation">
         By dragging the handles you
         <tspan x="230" dy="1.5em">can adjust the variance along</tspan>
         <tspan x="230" dy="1.5em">each dimension, as well as the</tspan>
         <tspan x="230" dy="1.5em">correlation between the two</tspan>
-        <tspan x="230" dy="1.5em">random variables. <tspan fill="{scale(0.35)}" font-style="italic">Pink</tspan></tspan>
+        <tspan x="230" dy="1.5em">
+          random variables.
+          <tspan fill="{scale(0.35)}" font-style="italic">Pink</tspan>
+        </tspan>
         <tspan x="230" dy="1.5em">regions show a high probability</tspan>
-        <tspan x="230" dy="1.5em">inside the distribution. <tspan fill="{scale(1)}" font-style="italic">Violet</tspan></tspan>
+        <tspan x="230" dy="1.5em">
+          inside the distribution.
+          <tspan fill="{scale(1)}" font-style="italic">Violet</tspan>
+        </tspan>
         <tspan x="230" dy="1.5em">points are samples from the</tspan>
         <tspan x="230" dy="1.5em">distribution.</tspan>
-        </text>
-      </svg>
+      </text>
+    </svg>
   </div>
 </div>
 
 <style>
+  svg {
+    width: 100%;
+    height: auto;
+  }
 
-    svg {
-      width: 100%;
-      height: auto;
-    }
+  .gauss-grid {
+    display: inline-grid;
+    grid-template-columns: 1fr 2fr;
+    grid-auto-rows: min-content;
+    text-align: center;
+  }
 
+  @media only screen and (max-width: 1168px) {
     .gauss-grid {
-        display: inline-grid;
-        grid-template-columns: 1fr 2fr;
-        grid-auto-rows: min-content;
-        text-align: center;
+      display: inline-grid;
+      grid-template-columns: 1fr;
+      grid-auto-rows: min-content;
+      text-align: center;
     }
+  }
 
-    @media only screen and (max-width: 1168px) {
-      .gauss-grid {
-        display: inline-grid;
-        grid-template-columns: 1fr;
-        grid-auto-rows: min-content;
-        text-align: center;
-      }
-    }
+  .grid-item {
+    margin: 5px;
+  }
 
-    .grid-item {
-      margin: 5px;
-    }
-
-    .plot {
-        float: left;
-    }
+  .plot {
+    float: left;
+  }
 </style>
 {@debug}

@@ -1,78 +1,125 @@
 <script>
- import { onMount } from 'svelte';
- import * as d3 from 'd3';
- import {nDecimals} from '../util';
- import * as gauss from '../gaussian';
- import {Context} from './util/context';
- import InteractiveGaussian from './InteractiveGaussian.html';
- import CovMat2x2 from './CovMat2x2.html';
+  import { onMount } from "svelte";
+  import * as d3 from "d3";
+  import { nDecimals } from "../util";
+  import * as gauss from "../gaussian";
+  import { Context } from "./util/context";
+  import InteractiveGaussian from "./InteractiveGaussian.html";
+  import CovMat2x2 from "./CovMat2x2.html";
 
- export let context = new Context(300, 300, [-2, 2], [-2, 2]);
- export let gaussian = new gauss.Gaussian([0, 0], [[1, 0], [0, 1]]);
- export let errorMean;
- export let errorCov;
+  export let context = new Context(300, 300, [-2, 2], [-2, 2]);
+  export let gaussian = new gauss.Gaussian(
+    [0, 0],
+    [
+      [1, 0],
+      [0, 1],
+    ],
+  );
+  export let errorMean;
+  export let errorCov;
 
- export let resample = 1;
- export let n_samples = 1000;
- export let n_samples_slider = 1;
+  export let resample = 1;
+  export let n_samples = 1000;
+  export let n_samples_slider = 1;
 
- function update_errors(event) {
-   errorMean = nDecimals(event.detail.errorMean, 4);
-   errorCov = nDecimals(event.detail.errorCov, 4);
- }
+  function update_errors(event) {
+    errorMean = nDecimals(event.detail.errorMean, 4);
+    errorCov = nDecimals(event.detail.errorCov, 4);
+  }
 
- function updateSlider() {
-   const options = [100, 1000, 10000];
-   n_samples = options[n_samples_slider];
- }
+  function updateSlider() {
+    const options = [100, 1000, 10000];
+    n_samples = options[n_samples_slider];
+  }
 
- function resampleGaussian() {
-   // Changing the value will trigger the resample
-   resample++;
- }
-
+  function resampleGaussian() {
+    // Changing the value will trigger the resample
+    resample++;
+  }
 </script>
 
 <div class="gauss-grid">
-    <div class="grid-item">
-        <svg width="{context.width}" height="{context.height}" viewBox="0 0 {context.width} {context.height}" class="plot">
-            <InteractiveGaussian on:update={update_errors} sigma1="{gaussian.cov.get(0,0)}" sigma2="{gaussian.cov.get(1,1)}" corr="{gaussian.cov.get(0,1)}" {context} {n_samples} {resample}/>
-        </svg>
-    </div>
+  <div class="grid-item">
+    <svg
+      width="{context.width}"
+      height="{context.height}"
+      viewBox="0 0 {context.width} {context.height}"
+      class="plot"
+    >
+      <InteractiveGaussian
+        on:update="{update_errors}"
+        sigma1="{gaussian.cov.get(0,0)}"
+        sigma2="{gaussian.cov.get(1,1)}"
+        corr="{gaussian.cov.get(0,1)}"
+        {context}
+        {n_samples}
+        {resample}
+      />
+    </svg>
+  </div>
 
-    <div class="grid-item">
-      <!-- Slider to adjust sample points -->
-      <p class="label"> <input disabled class="labelSlider" value="Sample points"> = <input disabled class="entry" bind:value={n_samples}></p>
-      <input bind:value={n_samples_slider} id="input" type="range" min="0" max="2" step="1" on:input="{updateSlider}">
-      <div id="output"></div>
-      <!-- Resampling button -->
-      <button on:click={resampleGaussian} type="button">Resample</button>
-      <!-- Errors -->
-      <table style="border-bottom: none">
-        <tr>
-          <td style="border-bottom: none"><d-math>\| \hat\mu - \mu \|_2 = </d-math></td>
-          <td style="border-bottom: none">
-            <svg width="56" height="42">
-              <g transform="translate(0,7)">
-                <rect x="0" y="0" width="50" height="35" rx="5" ry="5" class="entryBox" />
-                <text x="25" y="23" class="entry">{errorMean}</text>
-              </g>
-            </svg>
-          </td>
-        </tr>
-        <tr>
-          <td><d-math>\| \hat\Sigma - \Sigma \|_2 = </d-math></td>
-          <td>
-            <svg width="56" height="42">
-              <g transform="translate(0,7)">
-                <rect x="0" y="0" width="50" height="35" rx="5" ry="5" class="entryBox" />
-                <text x="25" y="23" class="entry">{errorCov}</text>
-              </g>
-            </svg>
-          </td>
-        </tr>
-      </table>
-      <!-- <svg width="450" height="200">
+  <div class="grid-item">
+    <!-- Slider to adjust sample points -->
+    <p class="label">
+      <input disabled class="labelSlider" value="Sample points" /> =
+      <input disabled class="entry" bind:value="{n_samples}" />
+    </p>
+    <input
+      bind:value="{n_samples_slider}"
+      id="input"
+      type="range"
+      min="0"
+      max="2"
+      step="1"
+      on:input="{updateSlider}"
+    />
+    <div id="output"></div>
+    <!-- Resampling button -->
+    <button on:click="{resampleGaussian}" type="button">Resample</button>
+    <!-- Errors -->
+    <table style="border-bottom: none">
+      <tr>
+        <td style="border-bottom: none">
+          <d-math>\| \hat\mu - \mu \|_2 = </d-math>
+        </td>
+        <td style="border-bottom: none">
+          <svg width="56" height="42">
+            <g transform="translate(0,7)">
+              <rect
+                x="0"
+                y="0"
+                width="50"
+                height="35"
+                rx="5"
+                ry="5"
+                class="entryBox"
+              />
+              <text x="25" y="23" class="entry">{errorMean}</text>
+            </g>
+          </svg>
+        </td>
+      </tr>
+      <tr>
+        <td><d-math>\| \hat\Sigma - \Sigma \|_2 = </d-math></td>
+        <td>
+          <svg width="56" height="42">
+            <g transform="translate(0,7)">
+              <rect
+                x="0"
+                y="0"
+                width="50"
+                height="35"
+                rx="5"
+                ry="5"
+                class="entryBox"
+              />
+              <text x="25" y="23" class="entry">{errorCov}</text>
+            </g>
+          </svg>
+        </td>
+      </tr>
+    </table>
+    <!-- <svg width="450" height="200">
            <text x="70" y="40" class="annotation"><tspan font-weight="bold">Sample points</tspan></text>
            <g transform="translate(82,50)">
            <CovMat2x2 sigma1={twoDecimals(gaussian.cov.get(0,0))} sigma2={twoDecimals(gaussian.cov.get(1,1))}
@@ -92,51 +139,50 @@
 </div>
 
 <style>
+  svg {
+    width: 100%;
+    height: auto;
+  }
 
-    svg {
-      width: 100%;
-      height: auto;
-    }
+  .gauss-grid {
+    display: inline-grid;
+    grid-template-columns: 1fr 2fr;
+    grid-auto-rows: min-content;
+    text-align: center;
+  }
 
+  @media only screen and (max-width: 1168px) {
     .gauss-grid {
-        display: inline-grid;
-        grid-template-columns: 1fr 2fr;
-        grid-auto-rows: min-content;
-        text-align: center;
+      display: inline-grid;
+      grid-template-columns: 1fr;
+      grid-auto-rows: min-content;
+      text-align: center;
     }
+  }
 
-    @media only screen and (max-width: 1168px) {
-      .gauss-grid {
-        display: inline-grid;
-        grid-template-columns: 1fr;
-        grid-auto-rows: min-content;
-        text-align: center;
-      }
-    }
+  .grid-item {
+    margin: 5px;
+  }
 
-    .grid-item {
-      margin: 5px;
-    }
+  .plot {
+    float: left;
+  }
 
-    .plot {
-        float: left;
-    }
+  input {
+    font-size: 12px;
+  }
 
- input {
-   font-size: 12px;
- }
+  .entry {
+    font-size: 14px;
+    fill: rgba(0, 0, 0, 0.8);
+    text-anchor: middle;
+    alignment-baseline: center;
+  }
 
- .entry {
-   font-size: 14px;
-   fill: rgba(0,0,0,0.8);
-   text-anchor: middle;
-   alignment-baseline: center;
- }
-
- .entryBox {
-   fill: hsl(200, 20%, 97%);
-   stroke-width: 1;
-   stroke: rgba(0,0,0,0.2);
- }
+  .entryBox {
+    fill: hsl(200, 20%, 97%);
+    stroke-width: 1;
+    stroke: rgba(0, 0, 0, 0.2);
+  }
 </style>
 {@debug}

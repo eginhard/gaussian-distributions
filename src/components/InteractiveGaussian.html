@@ -1,199 +1,253 @@
 <script>
- import { onMount, afterUpdate, createEventDispatcher } from 'svelte';
- import * as gauss from '../gaussian';
- import * as d3 from 'd3';
- import * as m from 'ml-matrix';
- import {Context} from './util/context';
- import {clamp} from './util/limit';
- import GaussianContours from './GaussianContours.html';
+  import { onMount, afterUpdate, createEventDispatcher } from "svelte";
+  import * as gauss from "../gaussian";
+  import * as d3 from "d3";
+  import * as m from "ml-matrix";
+  import { Context } from "./util/context";
+  import { clamp } from "./util/limit";
+  import GaussianContours from "./GaussianContours.html";
 
- const dispatch = createEventDispatcher();
+  const dispatch = createEventDispatcher();
 
- export let graph;
- export let sigma1 = 1;
- export let sigma2 = 1;
- export let corr = 0;
- const magnitude = v => Math.sqrt(v[0] * v[0] + v[1] * v[1]);
- export let gaussian = new gauss.Gaussian([0, 0], [[sigma1, corr], [corr, sigma2]]);
- const e = new m.EigenvalueDecomposition(gaussian.cov);
- const l1 = Math.sqrt(e.realEigenvalues[0]);
- const l2 = Math.sqrt(e.realEigenvalues[1]);
+  export let graph;
+  export let sigma1 = 1;
+  export let sigma2 = 1;
+  export let corr = 0;
+  const magnitude = (v) => Math.sqrt(v[0] * v[0] + v[1] * v[1]);
+  export let gaussian = new gauss.Gaussian(
+    [0, 0],
+    [
+      [sigma1, corr],
+      [corr, sigma2],
+    ],
+  );
+  const e = new m.EigenvalueDecomposition(gaussian.cov);
+  const l1 = Math.sqrt(e.realEigenvalues[0]);
+  const l2 = Math.sqrt(e.realEigenvalues[1]);
 
- export let eig = {
-   e1: {
-     x: e.eigenvectorMatrix.get(0,0) * l1,
-     y: e.eigenvectorMatrix.get(1,0) * l1,
-   },
-   e2: {
-     x: e.eigenvectorMatrix.get(0,1) * l2,
-     y: e.eigenvectorMatrix.get(1,1) * l2
- }};
- export let mean = gaussian.mean;
- export let context = new Context(300, 300, [-3, 3], [-3, 3]);
+  export let eig = {
+    e1: {
+      x: e.eigenvectorMatrix.get(0, 0) * l1,
+      y: e.eigenvectorMatrix.get(1, 0) * l1,
+    },
+    e2: {
+      x: e.eigenvectorMatrix.get(0, 1) * l2,
+      y: e.eigenvectorMatrix.get(1, 1) * l2,
+    },
+  };
+  export let mean = gaussian.mean;
+  export let context = new Context(300, 300, [-3, 3], [-3, 3]);
 
- $: {
-   const T = new m.Matrix([[eig.e1.x, eig.e2.x], [eig.e1.y, eig.e2.y]]);
-   gaussian = new gauss.Gaussian(mean, T.mmul(T.transpose()));
- }
+  $: {
+    const T = new m.Matrix([
+      [eig.e1.x, eig.e2.x],
+      [eig.e1.y, eig.e2.y],
+    ]);
+    gaussian = new gauss.Gaussian(mean, T.mmul(T.transpose()));
+  }
 
- export let e1;
- export let e2;
+  export let e1;
+  export let e2;
 
- // Sampling
- export let n_samples = 1000;
+  // Sampling
+  export let n_samples = 1000;
 
- function sample(n_samples) {
-   const values = [];
-   for (let i = 0; i < n_samples; i++) {
-     values.push(gaussian.sample());
-   }
-   return values;
- }
+  function sample(n_samples) {
+    const values = [];
+    for (let i = 0; i < n_samples; i++) {
+      values.push(gaussian.sample());
+    }
+    return values;
+  }
 
- // Generate samples
- export let resample = 1;
- export let samples;
- $: {
-   if (resample) {
-     samples = sample(n_samples);
-   }
- }
+  // Generate samples
+  export let resample = 1;
+  export let samples;
+  $: {
+    if (resample) {
+      samples = sample(n_samples);
+    }
+  }
 
- // Estimate mean and covariance from samples
- export let estimatedMean;
- $: {
-   estimatedMean = m.Matrix.zeros(gaussian.dim, 1);
-   for (let i = 0; i < n_samples; i++) {
-     estimatedMean.add(samples[i]);
-   }
-   estimatedMean.div(n_samples);
- }
+  // Estimate mean and covariance from samples
+  export let estimatedMean;
+  $: {
+    estimatedMean = m.Matrix.zeros(gaussian.dim, 1);
+    for (let i = 0; i < n_samples; i++) {
+      estimatedMean.add(samples[i]);
+    }
+    estimatedMean.div(n_samples);
+  }
 
- export let estimatedCov;
- $: {
-   estimatedCov = m.Matrix.zeros(gaussian.dim, gaussian.dim);
-   for (let i = 0; i < n_samples; i++) {
-     let diff = m.Matrix.sub(samples[i], estimatedMean);
-     estimatedCov.add(diff.mmul(diff.transpose()));
-   }
-   estimatedCov.div(n_samples - 1);
- }
+  export let estimatedCov;
+  $: {
+    estimatedCov = m.Matrix.zeros(gaussian.dim, gaussian.dim);
+    for (let i = 0; i < n_samples; i++) {
+      let diff = m.Matrix.sub(samples[i], estimatedMean);
+      estimatedCov.add(diff.mmul(diff.transpose()));
+    }
+    estimatedCov.div(n_samples - 1);
+  }
 
- function update() {
-   dispatch('update', {
-     gaussian: gaussian,
-     errorMean: errorMean,
-     errorCov: errorCov
-   });
- }
+  function update() {
+    dispatch("update", {
+      gaussian: gaussian,
+      errorMean: errorMean,
+      errorCov: errorCov,
+    });
+  }
 
- // Compute error of estimated mean and covariance
- export let errorMean;
- $: errorMean = m.Matrix.sub(gaussian.mean, estimatedMean).norm();
+  // Compute error of estimated mean and covariance
+  export let errorMean;
+  $: errorMean = m.Matrix.sub(gaussian.mean, estimatedMean).norm();
 
- export let errorCov;
- $: {
-   errorCov = m.Matrix.sub(gaussian.cov, estimatedCov).norm();
-   update();
- };
+  export let errorCov;
+  $: {
+    errorCov = m.Matrix.sub(gaussian.cov, estimatedCov).norm();
+    update();
+  }
 
- function update_gaussian() {
-   samples = sample(n_samples);
-   update();
- }
+  function update_gaussian() {
+    samples = sample(n_samples);
+    update();
+  }
 
- onMount(() => {
-   update();
-   const svg = d3.select(graph);
-   var points = svg.selectAll('.sample')
-                   .data(samples);
+  onMount(() => {
+    update();
+    const svg = d3.select(graph);
+    var points = svg.selectAll(".sample").data(samples);
 
-   points.enter()
-         .append('circle')
-         .attr('class', 'sample')
-         .attr('fill', 'rgb(73, 0, 106, 0.5)')
-         .attr('r', 1)
-         .attr('cx', d => context.u(d.get(0, 0)))
-         .attr('cy', d => context.v(d.get(1, 0)));
+    points
+      .enter()
+      .append("circle")
+      .attr("class", "sample")
+      .attr("fill", "rgb(73, 0, 106, 0.5)")
+      .attr("r", 1)
+      .attr("cx", (d) => context.u(d.get(0, 0)))
+      .attr("cy", (d) => context.v(d.get(1, 0)));
 
-   // Interactive handles
-   d3.select(e1).call(d3.drag()
-                        .on('drag', (event, d) => {
-                          const k = (eig.e2.x)*(eig.e2.x)+(eig.e2.y)*(eig.e2.y);
-                          const x = context.x(clamp(event.x, 10, context.width - 10));
-                          const y = context.y(clamp(event.y, 10, context.height - 10));
-                          eig.e1 = { x: x, y: y, };
-                          eig.e2 = {
-                            x: (-y * Math.sqrt(k)) / magnitude([x, y]),
-                            y: (x  * Math.sqrt(k)) / magnitude([x, y])
-                          };
-                          update_gaussian();
-   }));
+    // Interactive handles
+    d3.select(e1).call(
+      d3.drag().on("drag", (event, d) => {
+        const k = eig.e2.x * eig.e2.x + eig.e2.y * eig.e2.y;
+        const x = context.x(clamp(event.x, 10, context.width - 10));
+        const y = context.y(clamp(event.y, 10, context.height - 10));
+        eig.e1 = { x: x, y: y };
+        eig.e2 = {
+          x: (-y * Math.sqrt(k)) / magnitude([x, y]),
+          y: (x * Math.sqrt(k)) / magnitude([x, y]),
+        };
+        update_gaussian();
+      }),
+    );
 
-   d3.select(e2).call(d3.drag()
-                        .on('drag', (event, d) => {
-                          const k = (eig.e1.x)*(eig.e1.x)+(eig.e1.y)*(eig.e1.y);
-                          const x = context.x(clamp(event.x, 10, context.width - 10));
-                          const y = context.y(clamp(event.y, 10, context.height - 10));
-                          eig.e2 = { x: x, y: y, };
-                          eig.e1 = {
-                            x: (y * Math.sqrt(k)) / magnitude([x, y]),
-                            y: (-x  * Math.sqrt(k)) / magnitude([x, y])
-                          };
-                          update_gaussian();
-   }));
- });
+    d3.select(e2).call(
+      d3.drag().on("drag", (event, d) => {
+        const k = eig.e1.x * eig.e1.x + eig.e1.y * eig.e1.y;
+        const x = context.x(clamp(event.x, 10, context.width - 10));
+        const y = context.y(clamp(event.y, 10, context.height - 10));
+        eig.e2 = { x: x, y: y };
+        eig.e1 = {
+          x: (y * Math.sqrt(k)) / magnitude([x, y]),
+          y: (-x * Math.sqrt(k)) / magnitude([x, y]),
+        };
+        update_gaussian();
+      }),
+    );
+  });
 
- afterUpdate(() => {
-   const svg = d3.select(graph);
-   var points = svg.selectAll('.sample')
-                   .data(samples);
+  afterUpdate(() => {
+    const svg = d3.select(graph);
+    var points = svg.selectAll(".sample").data(samples);
 
-   points.exit()
-         .remove();
+    points.exit().remove();
 
-   points.enter()
-         .append('circle')
-         .attr('class', 'sample')
-         .attr('fill', 'rgb(73, 0, 106, 0.5)')
-         .attr('r', 1)
-         .merge(points)
-         .transition()
-         .duration(500)
-         .attr('cx', d => context.u(d.get(0, 0)))
-         .attr('cy', d => context.v(d.get(1, 0)));
- });
+    points
+      .enter()
+      .append("circle")
+      .attr("class", "sample")
+      .attr("fill", "rgb(73, 0, 106, 0.5)")
+      .attr("r", 1)
+      .merge(points)
+      .transition()
+      .duration(500)
+      .attr("cx", (d) => context.u(d.get(0, 0)))
+      .attr("cy", (d) => context.v(d.get(1, 0)));
+  });
 </script>
 
 <svg width="{context.width}" height="{context.height}">
-  <g bind:this={graph}>
+  <g bind:this="{graph}">
     <!-- Contours -->
-    <GaussianContours width="{context.width}" height="{context.height}" {context} {gaussian} />
+    <GaussianContours
+      width="{context.width}"
+      height="{context.height}"
+      {context}
+      {gaussian}
+    />
     <!-- Handles -->
-    <circle class="handle"  cx={context.u(eig.e1.x)} cy={context.v(eig.e1.y)} r="4" />
-    <circle class="handle"  cx={context.u(eig.e2.x)} cy={context.v(eig.e2.y)} r="4" />
-    <line class="handleLine" x1={context.u(gaussian.mean.get(0, 0))} y1={context.v(gaussian.mean.get(1, 0))} x2={context.u(eig.e1.x)} y2={context.v(eig.e1.y)} />
-    <line class="handleLine" x1={context.u(gaussian.mean.get(0, 0))} y1={context.v(gaussian.mean.get(1, 0))} x2={context.u(eig.e2.x)} y2={context.v(eig.e2.y)} />
-    <circle class="handleInvisible" bind:this={e1} cx={context.u(eig.e1.x)} cy={context.v(eig.e1.y)} r="44" />
-    <circle class="handleInvisible" bind:this={e2} cx={context.u(eig.e2.x)} cy={context.v(eig.e2.y)} r="44" />
+    <circle
+      class="handle"
+      cx="{context.u(eig.e1.x)}"
+      cy="{context.v(eig.e1.y)}"
+      r="4"
+    />
+    <circle
+      class="handle"
+      cx="{context.u(eig.e2.x)}"
+      cy="{context.v(eig.e2.y)}"
+      r="4"
+    />
+    <line
+      class="handleLine"
+      x1="{context.u(gaussian.mean.get(0,"
+      0))}
+      y1="{context.v(gaussian.mean.get(1,"
+      0))}
+      x2="{context.u(eig.e1.x)}"
+      y2="{context.v(eig.e1.y)}"
+    />
+    <line
+      class="handleLine"
+      x1="{context.u(gaussian.mean.get(0,"
+      0))}
+      y1="{context.v(gaussian.mean.get(1,"
+      0))}
+      x2="{context.u(eig.e2.x)}"
+      y2="{context.v(eig.e2.y)}"
+    />
+    <circle
+      class="handleInvisible"
+      bind:this="{e1}"
+      cx="{context.u(eig.e1.x)}"
+      cy="{context.v(eig.e1.y)}"
+      r="44"
+    />
+    <circle
+      class="handleInvisible"
+      bind:this="{e2}"
+      cx="{context.u(eig.e2.x)}"
+      cy="{context.v(eig.e2.y)}"
+      r="44"
+    />
   </g>
 </svg>
 
 <style>
- .handleLine {
-   stroke: rgba(0, 110, 168);
-   stroke-width: 2;
- }
- .handleInvisible {
+  .handleLine {
+    stroke: rgba(0, 110, 168);
+    stroke-width: 2;
+  }
+  .handleInvisible {
     fill: rgba(245, 181, 62, 0);
     cursor: grab;
   }
 
- .handle {
+  .handle {
     fill: rgb(0, 110, 168);
   }
 
- .handle:hover {
+  .handle:hover {
     stroke: gray;
     stroke-width: 2px;
   }
