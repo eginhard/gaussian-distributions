@@ -1,0 +1,141 @@
+<script>
+  import { onMount } from "svelte";
+  import * as d3 from "d3";
+  import { nDecimals } from "../util";
+  import * as gauss from "../gaussian";
+  import { Context } from "./util/context";
+  import InteractiveGaussian from "./InteractiveGaussian.html";
+
+  export let context = new Context(300, 300, [-2, 2], [-2, 2]);
+  export let target = new gauss.Gaussian(
+    [-0.6, 0.7],
+    [
+      [0.8, 0.3],
+      [0.3, 0.4],
+    ],
+  );
+  export let gaussian = new gauss.Gaussian(
+    [0, 0],
+    [
+      [1, 0],
+      [0, 1],
+    ],
+  );
+  export let n_samples = 1000;
+  export let samples = target.sample(n_samples);
+  export let logLikelihood;
+  $: {
+    logLikelihood = nDecimals(gaussian.jointLogLikelihood(samples), 2);
+  }
+
+  function update_gaussian(event) {
+    gaussian = event.detail.gaussian;
+  }
+</script>
+
+<div class="gauss-grid">
+  <div class="grid-item">
+    <svg
+      width="{context.width}"
+      height="{context.height}"
+      viewBox="0 0 {context.width} {context.height}"
+      class="plot"
+    >
+      <InteractiveGaussian
+        on:update="{update_gaussian}"
+        mu1="{gaussian.mean.get(0,0)}"
+        mu2="{gaussian.mean.get(1,0)}"
+        sigma1="{gaussian.cov.get(0,0)}"
+        sigma2="{gaussian.cov.get(1,1)}"
+        corr="{gaussian.cov.get(0,1)}"
+        show_samples="{false}"
+        n_samples="{1}"
+        {context}
+      />
+      <InteractiveGaussian
+        mu1="{target.mean.get(0,0)}"
+        mu2="{target.mean.get(1,0)}"
+        sigma1="{target.cov.get(0,0)}"
+        sigma2="{target.cov.get(1,1)}"
+        corr="{target.cov.get(0,1)}"
+        show_contours="{false}"
+        show_handles="{false}"
+        {context}
+        {samples}
+      />
+    </svg>
+  </div>
+
+  <div class="grid-item">
+    <div id="output"></div>
+    <!-- Errors -->
+    <table style="border-bottom: none">
+      <tr>
+        <td style="border-bottom: none">
+          <d-math>\log p(X|\Theta) = </d-math>
+        </td>
+        <td style="border-bottom: none">
+          <svg width="86" height="42">
+            <g transform="translate(0,7)">
+              <rect
+                x="0"
+                y="0"
+                width="80"
+                height="35"
+                rx="5"
+                ry="5"
+                class="entryBox"
+              />
+              <text x="35" y="23" class="entry">{logLikelihood}</text>
+            </g>
+          </svg>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<style>
+  svg {
+    width: 100%;
+    height: auto;
+  }
+
+  .gauss-grid {
+    display: inline-grid;
+    grid-template-columns: 1fr 2fr;
+    grid-auto-rows: min-content;
+    text-align: center;
+  }
+
+  @media only screen and (max-width: 1168px) {
+    .gauss-grid {
+      display: inline-grid;
+      grid-template-columns: 1fr;
+      grid-auto-rows: min-content;
+      text-align: center;
+    }
+  }
+
+  .grid-item {
+    margin: 5px;
+  }
+
+  .plot {
+    float: left;
+  }
+
+  .entry {
+    font-size: 14px;
+    fill: rgba(0, 0, 0, 0.8);
+    text-anchor: middle;
+    alignment-baseline: center;
+  }
+
+  .entryBox {
+    fill: hsl(200, 20%, 97%);
+    stroke-width: 1;
+    stroke: rgba(0, 0, 0, 0.2);
+  }
+</style>
+{@debug}

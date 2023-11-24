@@ -24,3 +24,11 @@ estimationErrorTag.addEventListener("ready", () => {
   const target = estimationErrorTag.querySelector("#estimationError-target");
   estimationError = new EstimationError({ target });
 });
+
+import SampleLikelihood from "./components/SampleLikelihood.html";
+const sampleLikelihoodTag = document.getElementById("sampleLikelihood-dfigure");
+let sampleLikelihood;
+sampleLikelihoodTag.addEventListener("ready", () => {
+  const target = sampleLikelihoodTag.querySelector("#sampleLikelihood-target");
+  sampleLikelihood = new SampleLikelihood({ target });
+});

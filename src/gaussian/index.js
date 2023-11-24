@@ -37,15 +37,23 @@ export class Gaussian {
   }
 
   at(x) {
-    const diff = new m.Matrix([x]).transpose().sub(this.mean);
+    const diff = new m.Matrix(x).sub(this.mean);
     const n = diff
       .transpose()
       .mmul(m.inverse(this.cov))
       .mmul(diff)
       .mul(-0.5)
-      .exp();
-    const d = Math.sqrt(Math.pow(2 * Math.PI, this.mean.rows) * this.cov.det());
+      .exp()
+      .get(0, 0);
+    const d = Math.sqrt(
+      Math.pow(2 * Math.PI, this.mean.rows) * m.determinant(this.cov),
+    );
     return n * (1 / d);
+  }
+
+  jointLogLikelihood(xs) {
+    const logs = xs.map((x) => Math.log(this.at(x)));
+    return logs.reduce((a, b) => a + b, 0);
   }
 
   // idx is the first row of b

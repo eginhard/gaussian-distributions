@@ -91,6 +91,27 @@
       </figure>
     </d-figure>
 
+    <h3>Likelihood of a sample with respect to a Gaussian model</h3>
+
+    <p>The <em>likelihood</em> of a sample point $x$ given a Gaussian model $\Theta = (\mu, \Sigma)$ is the value of the probability density function $g_{(\mu,\Sigma)}(x)$ for that point. For a set of independent and identically distributed (i.i.d.) points $X = \{x_1, x_2, \ldots, x_N\}$, the <em>joint likelihood</em> is the product of the likelihoods for each point:</p>
+
+    <d-math block>
+      p(X|\Theta) = \prod_{i=1}^N p(x_i|\Theta) = \prod_{i=1}^N p(x_i|\mu, \Sigma) = \prod_{i=1}^N g_{(\mu,\Sigma)}(x_i)
+    </d-math>
+
+    <p>In practice, we compute log-likehoods to avoid numerical underflow:</p>
+
+    <d-math block>
+      \log p(X|\Theta) = \log \sum_{i=1}^N p(x_i|\Theta) = \log \sum_{i=1}^N p(x_i|\mu, \Sigma) = \log \sum_{i=1}^N g_{(\mu,\Sigma)}(x_i)
+    </d-math>
+
+    <d-figure id="sampleLikelihood-dfigure">
+      <figure>
+        <div id="sampleLikelihood-target"></div>
+        <figcaption>Try to adjust the Gaussian in order to minimize the log-likehood for the given sample.</figcaption>
+      </figure>
+    </d-figure>
+
     <h2 id="gaussian-speech">Gaussian distributions for speech processing</h2>
 
     <p>Speech features (or acoustic features) are examples of $d$-dimensional
@@ -390,7 +411,7 @@
   <d-appendix>
     <h3>Acknowledgments</h3>
     <p>
-      The structure and contents of this article are based on the <a href="https://publications.idiap.ch/index.php/publications/show/738">Introduction to Gaussian Statistics and Pattern Recognition</a> lab exercise originally developed by Sacha Krstulović, Mathew Magimai-Doss and Hervé Bourlard at the Idiap Research Institute.
+      The structure and contents of this article are based on the <a href="https://publications.idiap.ch/index.php/publications/show/738">Introduction to Gaussian Statistics and Pattern Recognition</a> lab exercise originally developed by Sacha Krstulović, Mathew Magimai-Doss and Hervé Bourlard at the Idiap Research Institute. This interactive version was prepared as a final project for <em>Communication in Science and Technology</em> course at École polytechnique fédérale de Lausanne (EPFL).
     </p>
 
     <p>
