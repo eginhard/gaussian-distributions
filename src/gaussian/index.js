@@ -91,15 +91,15 @@ export class Gaussian {
     //return r.mmul(d).to2DArray();
   }
 
-  sample() {
-    const z = m.Matrix.zeros(this.mean.rows, 1);
-    const normal = random.normal();
-    for (let i = 0; i < this.mean.rows; ++i) z.set(i, 0, normal());
-    const samples = m.Matrix.add(
-      this.mean,
-      this.transformationMatrix().mmul(z),
-    );
-    return samples;
+  sample(n = 1) {
+    const values = [];
+    for (let i = 0; i < n; i++) {
+      const z = m.Matrix.zeros(this.mean.rows, 1);
+      const normal = random.normal();
+      for (let i = 0; i < this.mean.rows; ++i) z.set(i, 0, normal());
+      values.push(m.Matrix.add(this.mean, this.transformationMatrix().mmul(z)));
+    }
+    return values;
   }
 
   getMean() {
