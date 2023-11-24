@@ -9,13 +9,19 @@
 
   const dispatch = createEventDispatcher();
 
+  export let show_contours = true;
+  export let show_handles = true;
+  export let show_samples = true;
+
   export let graph;
+  export let mu1 = 0;
+  export let mu2 = 0;
   export let sigma1 = 1;
   export let sigma2 = 1;
   export let corr = 0;
   const magnitude = (v) => Math.sqrt(v[0] * v[0] + v[1] * v[1]);
   export let gaussian = new gauss.Gaussian(
-    [0, 0],
+    [mu1, mu2],
     [
       [sigma1, corr],
       [corr, sigma2],
@@ -35,7 +41,6 @@
       y: e.eigenvectorMatrix.get(1, 1) * l2,
     },
   };
-  export let mean = gaussian.mean;
   export let context = new Context(300, 300, [-3, 3], [-3, 3]);
 
   $: {
@@ -43,9 +48,10 @@
       [eig.e1.x, eig.e2.x],
       [eig.e1.y, eig.e2.y],
     ]);
-    gaussian = new gauss.Gaussian(mean, T.mmul(T.transpose()));
+    gaussian = new gauss.Gaussian([mu1, mu2], T.mmul(T.transpose()));
   }
 
+  export let mid;
   export let e1;
   export let e2;
 
@@ -105,117 +111,141 @@
   onMount(() => {
     update();
     const svg = d3.select(graph);
-    var points = svg.selectAll(".sample").data(samples);
 
-    points
-      .enter()
-      .append("circle")
-      .attr("class", "sample")
-      .attr("fill", "rgb(73, 0, 106, 0.5)")
-      .attr("r", 1)
-      .attr("cx", (d) => context.u(d.get(0, 0)))
-      .attr("cy", (d) => context.v(d.get(1, 0)));
+    if (show_samples) {
+      var points = svg.selectAll(".sample").data(samples);
+      points
+        .enter()
+        .append("circle")
+        .attr("class", "sample")
+        .attr("fill", "rgb(73, 0, 106, 0.5)")
+        .attr("r", 1)
+        .attr("cx", (d) => context.u(d.get(0, 0)))
+        .attr("cy", (d) => context.v(d.get(1, 0)));
+    }
 
-    // Interactive handles
-    d3.select(e1).call(
-      d3.drag().on("drag", (event, d) => {
-        const k = eig.e2.x * eig.e2.x + eig.e2.y * eig.e2.y;
-        const x = context.x(clamp(event.x, 10, context.width - 10));
-        const y = context.y(clamp(event.y, 10, context.height - 10));
-        eig.e1 = { x: x, y: y };
-        eig.e2 = {
-          x: (-y * Math.sqrt(k)) / magnitude([x, y]),
-          y: (x * Math.sqrt(k)) / magnitude([x, y]),
-        };
-        update_gaussian();
-      }),
-    );
+    if (show_handles) {
+      d3.select(e1).call(
+        d3.drag().on("drag", (event, d) => {
+          const k = eig.e2.x * eig.e2.x + eig.e2.y * eig.e2.y;
+          const x = context.x(clamp(event.x, 10, context.width - 10));
+          const y = context.y(clamp(event.y, 10, context.height - 10));
+          eig.e1 = { x: x, y: y };
+          eig.e2 = {
+            x: (-y * Math.sqrt(k)) / magnitude([x, y]),
+            y: (x * Math.sqrt(k)) / magnitude([x, y]),
+          };
+          update_gaussian();
+        }),
+      );
 
-    d3.select(e2).call(
-      d3.drag().on("drag", (event, d) => {
-        const k = eig.e1.x * eig.e1.x + eig.e1.y * eig.e1.y;
-        const x = context.x(clamp(event.x, 10, context.width - 10));
-        const y = context.y(clamp(event.y, 10, context.height - 10));
-        eig.e2 = { x: x, y: y };
-        eig.e1 = {
-          x: (y * Math.sqrt(k)) / magnitude([x, y]),
-          y: (-x * Math.sqrt(k)) / magnitude([x, y]),
-        };
-        update_gaussian();
-      }),
-    );
+      d3.select(e2).call(
+        d3.drag().on("drag", (event, d) => {
+          const k = eig.e1.x * eig.e1.x + eig.e1.y * eig.e1.y;
+          const x = context.x(clamp(event.x, 10, context.width - 10));
+          const y = context.y(clamp(event.y, 10, context.height - 10));
+          eig.e2 = { x: x, y: y };
+          eig.e1 = {
+            x: (y * Math.sqrt(k)) / magnitude([x, y]),
+            y: (-x * Math.sqrt(k)) / magnitude([x, y]),
+          };
+          update_gaussian();
+        }),
+      );
+      d3.select(mid).call(
+        d3.drag().on("drag", (event, d) => {
+          const x = context.x(clamp(event.x, 10, context.width - 10));
+          const y = context.y(clamp(event.y, 10, context.height - 10));
+          mu1 = x;
+          mu2 = y;
+          update_gaussian();
+        }),
+      );
+    }
   });
 
   afterUpdate(() => {
     const svg = d3.select(graph);
-    var points = svg.selectAll(".sample").data(samples);
-
-    points.exit().remove();
-
-    points
-      .enter()
-      .append("circle")
-      .attr("class", "sample")
-      .attr("fill", "rgb(73, 0, 106, 0.5)")
-      .attr("r", 1)
-      .merge(points)
-      .transition()
-      .duration(500)
-      .attr("cx", (d) => context.u(d.get(0, 0)))
-      .attr("cy", (d) => context.v(d.get(1, 0)));
+    if (show_samples) {
+      var points = svg.selectAll(".sample").data(samples);
+      points.exit().remove();
+      points
+        .enter()
+        .append("circle")
+        .attr("class", "sample")
+        .attr("fill", "rgb(73, 0, 106, 0.5)")
+        .attr("r", 1)
+        .merge(points)
+        .transition()
+        .duration(500)
+        .attr("cx", (d) => context.u(d.get(0, 0)))
+        .attr("cy", (d) => context.v(d.get(1, 0)));
+    }
   });
 </script>
 
 <svg width="{context.width}" height="{context.height}">
   <g bind:this="{graph}">
     <!-- Contours -->
+    {#if show_contours}
     <GaussianContours
       width="{context.width}"
       height="{context.height}"
       {context}
       {gaussian}
     />
+    {/if}
     <!-- Handles -->
+    {#if show_handles}
     <circle
       class="handle"
-      cx="{context.u(eig.e1.x)}"
-      cy="{context.v(eig.e1.y)}"
-      r="4"
+      cx="{context.u(mu1 + eig.e1.x)}"
+      cy="{context.v(mu2 + eig.e1.y)}"
+      r="3"
     />
     <circle
       class="handle"
-      cx="{context.u(eig.e2.x)}"
-      cy="{context.v(eig.e2.y)}"
-      r="4"
+      cx="{context.u(mu1 + eig.e2.x)}"
+      cy="{context.v(mu2 + eig.e2.y)}"
+      r="3"
+    />
+    <circle class="handle" cx="{context.u(mu1)}" cy="{context.v(mu2)}" r="4" />
+    <line
+      class="handleLine"
+      x1="{context.u(mu1)}"
+      y1="{context.v(mu2)}"
+      x2="{context.u(mu1 + eig.e1.x)}"
+      y2="{context.v(mu2 + eig.e1.y)}"
     />
     <line
       class="handleLine"
-      x1="{context.u(gaussian.mean.get(0,0))}"
-      y1="{context.v(gaussian.mean.get(1,0))}"
-      x2="{context.u(eig.e1.x)}"
-      y2="{context.v(eig.e1.y)}"
-    />
-    <line
-      class="handleLine"
-      x1="{context.u(gaussian.mean.get(0,0))}"
-      y1="{context.v(gaussian.mean.get(1,0))}"
-      x2="{context.u(eig.e2.x)}"
-      y2="{context.v(eig.e2.y)}"
+      x1="{context.u(mu1)}"
+      y1="{context.v(mu2)}"
+      x2="{context.u(mu1 + eig.e2.x)}"
+      y2="{context.v(mu2 + eig.e2.y)}"
     />
     <circle
       class="handleInvisible"
       bind:this="{e1}"
-      cx="{context.u(eig.e1.x)}"
-      cy="{context.v(eig.e1.y)}"
+      cx="{context.u(mu1 + eig.e1.x)}"
+      cy="{context.v(mu2 + eig.e1.y)}"
       r="44"
     />
     <circle
       class="handleInvisible"
       bind:this="{e2}"
-      cx="{context.u(eig.e2.x)}"
-      cy="{context.v(eig.e2.y)}"
+      cx="{context.u(mu1 + eig.e2.x)}"
+      cy="{context.v(mu2 + eig.e2.y)}"
       r="44"
     />
+    <circle
+      class="handleInvisible"
+      bind:this="{mid}"
+      cx="{context.u(mu1)}"
+      cy="{context.v(mu2)}"
+      r="44"
+    />
+    {/if}
   </g>
 </svg>
 
