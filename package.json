@@ -22,7 +22,7 @@
     "lucid-components": "0.0.6",
     "npm": "^10.2.4",
     "raw-loader": "^4.0.2",
-    "svelte": "^4.2.7",
+    "svelte": "^4.2.19",
     "svelte-loader": "^3.1.9",
     "svg-inline-loader": "^0.8.2",
     "to-string-loader": "^1.2.0",
