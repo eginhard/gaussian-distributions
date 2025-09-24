@@ -12,6 +12,7 @@ module.exports = {
   },
   resolve: {
     extensions: [".js", ".html", ".npy"],
+    conditionNames: ["svelte", "browser", "import", "require", "default"],
   },
   output: {
     path: __dirname + "/public",

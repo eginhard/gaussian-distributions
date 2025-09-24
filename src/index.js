@@ -2,8 +2,9 @@
 import * as _unused from "raw-loader!./index.ejs";
 // TODO: disable before publishing
 
+import { mount } from "svelte";
 import Teaser from "./components/Teaser.html";
-const TeaserComponent = new Teaser({
+const TeaserComponent = mount(Teaser, {
   // eslint-disable-line no-unused-vars
   target: document.querySelector("#Teaser"),
 });
@@ -14,7 +15,7 @@ const multivariateTag = document.getElementById("multivariate-dfigure");
 let multivariate;
 multivariateTag.addEventListener("ready", () => {
   const target = multivariateTag.querySelector("#multivariate-target");
-  multivariate = new Multivariate({ target });
+  multivariate = mount(Multivariate, { target });
 });
 
 import EstimationError from "./components/EstimationError.html";
@@ -22,7 +23,7 @@ const estimationErrorTag = document.getElementById("estimationError-dfigure");
 let estimationError;
 estimationErrorTag.addEventListener("ready", () => {
   const target = estimationErrorTag.querySelector("#estimationError-target");
-  estimationError = new EstimationError({ target });
+  estimationError = mount(EstimationError, { target });
 });
 
 import SampleLikelihood from "./components/SampleLikelihood.html";
@@ -30,5 +31,5 @@ const sampleLikelihoodTag = document.getElementById("sampleLikelihood-dfigure");
 let sampleLikelihood;
 sampleLikelihoodTag.addEventListener("ready", () => {
   const target = sampleLikelihoodTag.querySelector("#sampleLikelihood-target");
-  sampleLikelihood = new SampleLikelihood({ target });
+  sampleLikelihood = mount(SampleLikelihood, { target });
 });
